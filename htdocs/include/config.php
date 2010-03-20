@@ -27,7 +27,7 @@ $GLOBALS["config"]["app_name"]			= "ABS Customer Portal";
 $GLOBALS["config"]["app_version"]		= "1.0.0_beta_1";
 
 // define the schema version required
-$GLOBALS["config"]["schema_version"]		= "20091026";
+$GLOBALS["config"]["schema_version"]		= "20100321";
 
 
 

@@ -41,6 +41,7 @@
 */
 include("include/config.php");
 include("include/amberphplib/main.php");
+include("include/application/main.php");
 
 
 log_debug("index", "Starting index.php");

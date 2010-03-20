@@ -19,6 +19,8 @@
 				(allows finer control over what users can login)
 	* ldaponly	authenticate using LDAP and also use LDAP for all user information
 				(all user information is from LDAP, allowing any user to login, but access is stricted by using groups in permissions_get())
+	* custom	authentication & user data supplied using a custom external class
+				(Call out to an external class user_auth_custom for authentication - used for special cases, like SOAP APIs, etc)
 
 	Refer to Amberphplib developer documentation for futher information on authentication.
 */
@@ -31,6 +33,9 @@ class user_auth
 	var $blacklist_enable;	// blacklist on/off
 	var $blacklist_limit;	// max num attempts before being blacklisted
 
+	var $obj_auth_custom;	// object to hold active custom authentication object
+
+
 
 	/*
 		Constructor
@@ -40,12 +45,21 @@ class user_auth
 	{
 		log_debug("user_auth", "Executing user_auth()");
 
-		// fetch authentication method from the database. If that fails, default to sql
+		// fetch authentication method from the database.
 		$this->method = sql_get_singlevalue("SELECT value FROM `config` WHERE name='AUTH_METHOD' LIMIT 1");
 
-		if (!$this->method)
+
+		// some authentication methods require some provisioning.
+		switch ($this->method)
 		{
-			$this->method = "sql";
+			case "custom":
+				$this->obj_auth_custom	= New user_auth_custom;
+			break;
+
+			default:
+				// default authentication method is SQL
+				$this->method = "sql";
+			break;
 		}
 	}
 
@@ -381,6 +395,19 @@ class user_auth
 
 		switch ($this->method)
 		{
+			case "custom":
+				/*
+					Custom Authentication
+
+					In this situation, we are relying on an external class/function to
+					perform the authentication for us.
+				*/
+
+				return $this->obj_auth_custom->login_authenticate($username, $password);
+
+			break;
+
+
 			case "ldaponly":
 				/*
 					LDAP-Only Authentication
@@ -682,6 +709,13 @@ class user_auth
 		}
 
 
+		// perform any method-specific session initalisation stuff
+		if ($this->method == "custom")
+		{
+			$this->obj_auth_custom->session_init();
+		}
+
+
 
 		// success
 		return 1;
@@ -756,6 +790,17 @@ class user_auth
 		// run checks based on the method type
 		switch ($this->method)
 		{
+			case "custom":
+				/*
+					CUSTOM METHOD
+
+					Execute an external function to perform the permissions lookups.
+				*/
+
+				return $this->obj_auth_custom->permissions_init();
+
+			break;
+
 			case "ldaponly":
 				/*
 					LDAP-ONLY METHOD

@@ -9,6 +9,7 @@
 // includes
 require("../include/config.php");
 require("../include/amberphplib/main.php");
+require("../include/application/main.php");
 
 // erase any data - gets rid of stale errors and user sessions.
 $_SESSION["error"] = array();
@@ -27,8 +28,8 @@ else
 {
 	// check & convert input
 	$instance	= NULL;
-	$username	= security_form_input("/^[A-Za-z0-9.]*$/", "username_absportal", 4, "Please enter a username.");
-	$password	= security_form_input("/^\S*$/", "password_absportal", 4, "Please enter a password.");
+	$username	= security_form_input("/^[A-Za-z0-9.]*$/", "username_absportal", 1, "Please enter a username.");
+	$password	= security_form_input("/^\S*$/", "password_absportal", 1, "Please enter a password.");
 
 
 	if ($_SESSION["error"]["message"])
